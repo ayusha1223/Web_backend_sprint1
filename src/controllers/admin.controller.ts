@@ -1,42 +1,62 @@
 import User from "../models/user.model";
 
 export const createUser = async (req: any, res: any) => {
-  const image = req.file ? req.file.filename : null;
+  try {
+    const image = req.file ? req.file.filename : null;
 
-  const user = await User.create({
-    ...req.body,
-    image,
-  });
+    const user = await User.create({
+      ...req.body,
+      image,
+    });
 
-  res.json(user);
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create user" });
+  }
 };
 
 export const getUsers = async (_: any, res: any) => {
-  const users = await User.find();
-  res.json(users);
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
 };
 
 export const getUser = async (req: any, res: any) => {
-  const user = await User.findById(req.params.id);
-  res.json(user);
+  try {
+    const user = await User.findById(req.params.id);
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch user" });
+  }
 };
 
 export const updateUser = async (req: any, res: any) => {
-  const image = req.file ? req.file.filename : undefined;
+  try {
+    const image = req.file ? req.file.filename : undefined;
 
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    {
-      ...req.body,
-      ...(image && { image }),
-    },
-    { new: true }
-  );
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        ...(image && { image }),
+      },
+      { new: true }
+    );
 
-  res.json(user);
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update user" });
+  }
 };
 
 export const deleteUser = async (req: any, res: any) => {
-  await User.findByIdAndDelete(req.params.id);
-  res.json({ message: "User deleted" });
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: "User deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete user" });
+  }
 };

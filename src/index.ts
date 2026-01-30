@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 
 import { connectDB } from "./database";
 import authRoutes from "./routes/auth.route";
+import adminRoutes from "./routes/admin.route";
 
 dotenv.config();             
 connectDB();
@@ -22,6 +23,9 @@ app.use(
 );
 
 app.use("/api/auth", authRoutes);
+
+app.use("/api/admin", adminRoutes);
+
 
 
 const PORT = process.env.PORT || 5050;
