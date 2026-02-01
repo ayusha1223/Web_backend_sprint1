@@ -1,4 +1,5 @@
-import { User } from "../models/user.model";
+import User from "../models/user.model";
+
 
 export class AuthRepository {
   findUserByEmail(email: any) {

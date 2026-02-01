@@ -1,13 +1,14 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
 import cookieParser from "cookie-parser";
 
 import { connectDB } from "./database";
 import authRoutes from "./routes/auth.route";
 import adminRoutes from "./routes/admin.route";
 
-dotenv.config();             
+dotenv.config();
 connectDB();
 
 const app = express();
@@ -17,16 +18,20 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "http://localhost:3000", 
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
 
+
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"))
+);
+
+
 app.use("/api/auth", authRoutes);
-
 app.use("/api/admin", adminRoutes);
-
-
 
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {

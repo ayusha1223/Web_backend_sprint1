@@ -1,36 +1,47 @@
-import express from "express";
-import { upload } from "../middleware/upload.middleware";
-import { authMiddleware } from "../middleware/auth.middleware";
-import { isAdmin } from "../middleware/admin.middleware";
-import * as AdminController from "../controllers/admin.controller";
+import { Router } from "express";
+import { AdminUserController } from "../controllers/admin/admin.controller";
+import auth from "../middlewares/auth.middleware";
+import admin from "../middlewares/admin.middleware";
+import upload from "../middlewares/upload.middleware";
 
-const router = express.Router();
 
+const router = Router();
+const adminUserController = new AdminUserController();
+
+// 🔐 Apply middlewares once (sir-style)
+router.use(auth);
+router.use(admin);
+
+// POST /api/admin/users
 router.post(
   "/users",
-  authMiddleware,
-  isAdmin,
   upload.single("image"),
-  AdminController.createUser
+  adminUserController.createUser.bind(adminUserController)
 );
 
-router.get("/users", authMiddleware, isAdmin, AdminController.getUsers);
+// GET /api/admin/users
+router.get(
+  "/users",
+  adminUserController.getAllUsers.bind(adminUserController)
+);
 
-router.get("/users/:id", authMiddleware, isAdmin, AdminController.getUser);
+// GET /api/admin/users/:id
+router.get(
+  "/users/:id",
+  adminUserController.getUserById.bind(adminUserController)
+);
 
+// PUT /api/admin/users/:id
 router.put(
   "/users/:id",
-  authMiddleware,
-  isAdmin,
   upload.single("image"),
-  AdminController.updateUser
+  adminUserController.updateUser.bind(adminUserController)
 );
 
+// DELETE /api/admin/users/:id
 router.delete(
   "/users/:id",
-  authMiddleware,
-  isAdmin,
-  AdminController.deleteUser
+  adminUserController.deleteUser.bind(adminUserController)
 );
 
 export default router;
