@@ -1,21 +1,21 @@
-import dotenv from "dotenv";
-import app from "./app.js";
-import { connectDB } from "./database/mongodb.js";
-import { PORT } from "./config/index.js";
+// import dotenv from "dotenv";
 
-dotenv.config();
+// import { connectDB } from "./database/mongodb.js";
+// import { PORT } from "./config/index.js";
 
-async function startServer() {
-  try {
-    await connectDB();
+// dotenv.config();
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server", error);
-    process.exit(1);
-  }
-}
+// async function startServer() {
+//   try {
+//     await connectDB();
 
-startServer();
+//     app.listen(PORT, () => {
+//       console.log(`🚀 Server running at http://localhost:${PORT}`);
+//     });
+//   } catch (error) {
+//     console.error("Failed to start server", error);
+//     process.exit(1);
+//   }
+// }
+
+// startServer();

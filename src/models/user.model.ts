@@ -6,6 +6,7 @@ export interface IUser extends Document {
   lastName?: string;      // sir-style
   username?: string;      // sir-style
   email: string;
+  phone?: string;
   password: string;
   role: "admin" | "user";
   image?: string;         // your existing field
@@ -39,6 +40,12 @@ const UserSchema: Schema<IUser> = new Schema(
       required: true,
       unique: true,
     },
+    phone: {
+  type: String,
+  required: true,
+  unique: true, 
+},
+
 
     password: {
       type: String,
@@ -51,7 +58,7 @@ const UserSchema: Schema<IUser> = new Schema(
       default: "user",
     },
 
-    // ✅ YOUR EXISTING FIELD
+    
     image: {
       type: String,
     },
