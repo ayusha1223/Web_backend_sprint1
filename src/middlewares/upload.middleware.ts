@@ -9,7 +9,7 @@ import { HttpError } from "../errors/http-error";
 // Storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "../../uploads");
+    const uploadPath = path.join(process.cwd(), "uploads");
 
     // Create uploads folder if it does not exist
     if (!fs.existsSync(uploadPath)) {

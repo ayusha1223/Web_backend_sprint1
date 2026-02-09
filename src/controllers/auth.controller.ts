@@ -55,20 +55,35 @@ export class AuthController {
   }
 
   // 🆕 PUT /api/auth/profile  (sir-style addition + multer)
-  static async updateProfile(req: any, res: Response) {
+ static async updateProfile(req: any, res: Response) {
   try {
     const userId = req.user?.id || req.user?._id;
-
     if (!userId) {
-      return res.status(400).json({ message: "User not authenticated" });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     const updateData: any = {};
 
+    // NAME
     if (req.body.name) {
       updateData.name = req.body.name;
     }
 
+    // PHONE
+    if (req.body.phone) {
+      updateData.phone = req.body.phone;
+    }
+
+    // PASSWORD
+    if (req.body.newPassword) {
+      const bcrypt = await import("bcryptjs");
+      updateData.password = await bcrypt.hash(
+        req.body.newPassword,
+        10
+      );
+    }
+
+    // IMAGE
     if (req.file) {
       updateData.image = `/uploads/${req.file.filename}`;
     }
@@ -76,15 +91,21 @@ export class AuthController {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       updateData,
-      { new: true }
+      {
+        new: true,
+        runValidators: true, // 🔥 IMPORTANT
+      }
     ).select("-password");
 
     return res.status(200).json({
       success: true,
+      message: "Profile updated successfully",
       data: updatedUser,
     });
   } catch (err: any) {
+    console.error("PROFILE UPDATE ERROR:", err); // 🔥 ADD THIS
     return res.status(400).json({ message: err.message });
   }
 }
+
 }
