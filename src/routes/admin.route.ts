@@ -3,10 +3,13 @@ import { AdminUserController } from "../controllers/admin/admin.controller";
 import auth from "../middlewares/auth.middleware";
 import admin from "../middlewares/admin.middleware";
 import upload from "../middlewares/upload.middleware";
+import { DashboardController } from "../controllers/admin/dashboard.controller";
+
 
 
 const router = Router();
 const adminUserController = new AdminUserController();
+const dashboardController = new DashboardController();
 
 // 🔐 Apply middlewares once (sir-style)
 router.use(auth);
@@ -18,6 +21,12 @@ router.post(
   upload.single("image"),
   adminUserController.createUser.bind(adminUserController)
 );
+// GET /api/admin/dashboard
+router.get(
+  "/dashboard",
+  dashboardController.getDashboard.bind(dashboardController)
+);
+
 
 // GET /api/admin/users
 router.get(

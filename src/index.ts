@@ -10,7 +10,7 @@ import authRoutes from "./routes/auth.route";
 import adminRoutes from "./routes/admin.route";
 import cartRoutes from "./routes/cart.route";
 import orderRoutes from "./routes/order.route";
-
+import productRoutes from "./routes/product.routes";
 // DB
 import { connectDB } from "./database";
 
@@ -45,6 +45,7 @@ app.use("/api/cart", cartRoutes); // ✅ FIXED PATH (IMPORTANT)
 
 // ORDERS
 app.use("/api/orders", orderRoutes); // ✅ THIS IS WHY ORDERS SAVE
+app.use("/api/admin/products", productRoutes);
 
 // AUTH & ADMIN
 app.use("/api/auth", authRoutes);
