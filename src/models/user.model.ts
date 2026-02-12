@@ -13,6 +13,9 @@ export interface IUser extends Document {
   imageUrl?: string;      // sir-style
   createdAt: Date;
   updatedAt: Date;
+  resetToken?: string;
+resetTokenExpiry?: Date;
+
 }
 
 const UserSchema: Schema<IUser> = new Schema(
@@ -45,8 +48,6 @@ const UserSchema: Schema<IUser> = new Schema(
   required: true,
   unique: true, 
 },
-
-
     password: {
       type: String,
       required: true,
@@ -62,6 +63,13 @@ const UserSchema: Schema<IUser> = new Schema(
     image: {
       type: String,
     },
+    resetToken: {
+  type: String,
+},
+resetTokenExpiry: {
+  type: Date,
+},
+
 
     // ➕ SIR-STYLE FIELD
     imageUrl: {

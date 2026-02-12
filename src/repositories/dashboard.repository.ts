@@ -2,6 +2,7 @@ import Order from "../models/order.model";
 import User from "../models/user.model";
 
 
+
 export class DashboardRepository {
   async countUsers() {
     return User.countDocuments({ role: "user" });

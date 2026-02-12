@@ -23,9 +23,9 @@ export class AdminUserService {
     return newUser;
   }
 
-  async getAllUsers() {
-    return await userRepository.getAllUsers();
-  }
+  async getAllUsers(page: number, limit: number) {
+  return await userRepository.getAllUsers(page, limit);
+}
 
   async getUserById(id: string) {
     const user = await userRepository.getUserById(id);

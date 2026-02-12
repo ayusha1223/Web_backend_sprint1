@@ -24,6 +24,9 @@ router.put(
   upload.single("image"),
   AuthController.updateProfile
 );
+router.post("/forgot-password", AuthController.forgotPassword);
+router.post("/reset-password", AuthController.resetPassword);
+
 router.put(
   "/:id",
   authMiddleware,

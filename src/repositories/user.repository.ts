@@ -5,12 +5,27 @@ export interface IUserRepository {
   getUserByUsername(username: string): Promise<IUser | null>;
   createUser(userData: Partial<IUser>): Promise<IUser>;
   getUserById(id: string): Promise<IUser | null>;
-  getAllUsers(): Promise<IUser[]>;
+
+  // ✅ UPDATED: Pagination Support
+  getAllUsers(
+    page: number,
+    limit: number
+  ): Promise<{
+    users: IUser[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+  }>;
+
   updateUser(id: string, updateData: Partial<IUser>): Promise<IUser | null>;
   deleteUser(id: string): Promise<boolean>;
 }
 
 export class UserRepository implements IUserRepository {
+
   async createUser(userData: Partial<IUser>): Promise<IUser> {
     const user = new User(userData);
     return await user.save();
@@ -25,11 +40,30 @@ export class UserRepository implements IUserRepository {
   }
 
   async getUserById(id: string): Promise<IUser | null> {
-    return await User.findById(id);
+    return await User.findById(id).select("-password");
   }
 
-  async getAllUsers(): Promise<IUser[]> {
-    return await User.find();
+  // ✅ PAGINATION IMPLEMENTED HERE
+  async getAllUsers(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+
+    const total = await User.countDocuments();
+
+    const users = await User.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .select("-password"); // 🔥 never return password
+
+    return {
+      users,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async updateUser(
@@ -38,7 +72,8 @@ export class UserRepository implements IUserRepository {
   ): Promise<IUser | null> {
     return await User.findByIdAndUpdate(id, updateData, {
       new: true,
-    });
+      runValidators: true,
+    }).select("-password");
   }
 
   async deleteUser(id: string): Promise<boolean> {

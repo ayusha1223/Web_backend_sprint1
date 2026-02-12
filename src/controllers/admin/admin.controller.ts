@@ -5,6 +5,8 @@ import {
   UpdateUserDTO
 } from "../../dtos/user.dto";
 import { AdminUserService } from "../../services/admin/user.service";
+import Order from "../../models/order.model";
+import Payment from "../../models/payment.model";
 
 
 const adminUserService = new AdminUserService();
@@ -44,41 +46,63 @@ export class AdminUserController {
   }
 
   // GET /api/admin/users
-  async getAllUsers(req: Request, res: Response, next: NextFunction) {
-    try {
-      const users = await adminUserService.getAllUsers();
-      return res.status(200).json({
-        success: true,
-        message: "All Users Retrieved",
-        data: users,
-      });
-    } catch (error: any) {
-      return res.status(error.statusCode ?? 500).json({
-        success: false,
-        message: error.message || "Internal Server Error",
-      });
-    }
+  // GET /api/admin/users
+async getAllUsers(req: Request, res: Response, next: NextFunction) {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 5;
+
+    const result = await adminUserService.getAllUsers(page, limit);
+
+    return res.status(200).json({
+      success: true,
+      message: "All Users Retrieved",
+      data: result.users,
+      pagination: result.pagination,
+    });
+
+  } catch (error: any) {
+    return res.status(error.statusCode ?? 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
   }
+}
 
   // GET /api/admin/users/:id
   async getUserById(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.params.id;
-      const user = await adminUserService.getUserById(userId);
+  try {
+    const userId = req.params.id;
 
-      return res.status(200).json({
-        success: true,
-        message: "Single User Retrieved",
-        data: user,
-      });
-    } catch (error: any) {
-      return res.status(error.statusCode ?? 500).json({
+    const user = await adminUserService.getUserById(userId);
+
+    if (!user) {
+      return res.status(404).json({
         success: false,
-        message: error.message || "Internal Server Error",
+        message: "User not found",
       });
     }
-  }
 
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+    const payments = await Payment.find({ userId }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Single User Retrieved",
+      data: {
+        user,
+        orders,
+        payments,
+      },
+    });
+
+  } catch (error: any) {
+    return res.status(error.statusCode ?? 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
+}
   // PUT /api/admin/users/:id
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
