@@ -6,6 +6,8 @@ import Order from "../models/order.model";
 import Payment from "../models/payment.model";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
+
 
 
 /**
@@ -57,14 +59,32 @@ export class AuthController {
 
     await user.save();
 
-    // 🔥 For demo (print reset link)
-    console.log(
-      `Reset link: http://localhost:3000/reset/${token}`
-    );
+    const resetLink = `http://localhost:3000/reset/${token}`;
+
+    // ✅ Create transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // ✅ Send email
+    await transporter.sendMail({
+      to: user.email,
+      subject: "Password Reset Request",
+      html: `
+        <h3>Password Reset</h3>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>This link expires in 1 hour.</p>
+      `,
+    });
 
     return res.status(200).json({
       success: true,
-      message: "Reset link generated (check console)",
+      message: "Reset link sent to email",
     });
 
   } catch (err: any) {
@@ -74,6 +94,7 @@ export class AuthController {
     });
   }
 }
+
 static async resetPassword(req: Request, res: Response) {
   try {
     const { token, newPassword } = req.body;
