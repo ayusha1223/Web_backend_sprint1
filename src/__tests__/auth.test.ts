@@ -1,6 +1,7 @@
 import request from "supertest";
-import app from "../app.js";
+
 import User from "../models/user.model";
+import app from "../app";
 
 let token: string;
 let userId: string;

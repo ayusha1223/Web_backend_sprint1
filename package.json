@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec ts-node src/index.ts",
-    "start": "ts-node src/index.ts"
-  },
-  "keywords": [],
+  "dev": "nodemon --exec ts-node src/index.ts",
+  "start": "ts-node src/index.ts",
+"test": "jest --detectOpenHandles --forceExit"
+},
+"keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
