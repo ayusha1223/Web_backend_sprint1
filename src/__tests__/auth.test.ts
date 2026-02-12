@@ -1,5 +1,4 @@
 import request from "supertest";
-
 import User from "../models/user.model";
 import app from "../app";
 
@@ -9,15 +8,20 @@ let userId: string;
 describe("AUTH + ADMIN INTEGRATION TESTS", () => {
 
   // 1
-  it("should register a user", async () => {
-    const res = await request(app).post("/api/auth/register").send({
-      email: "test@test.com",
-      password: "123456",
-      phone: "1234567890"
-    });
-
-    expect(res.statusCode).toBe(201);
+ it("should register a user", async () => {
+  const res = await request(app).post("/api/auth/register").send({
+    name: "Test User",
+    email: "test@test.com",
+    password: "123456",
+    confirmPassword: "123456",
+    role: "user"
   });
+
+  console.log(res.body); // temporary debugging
+
+  expect(res.statusCode).toBe(201);
+});
+
 
   // 2
   it("should fail if email missing", async () => {
