@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { JWT_SECRET } from "../config";
 
 // ✅ Extend Express Request to include user
 declare global {
@@ -24,9 +23,13 @@ const auth = (req: Request, res: Response, next: NextFunction) => {
 
     const token = authHeader.split(" ")[1];
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    // 🔥 IMPORTANT FIX HERE
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    );
 
-    req.user = decoded; // ✅ KEEP (your code depends on this)
+    req.user = decoded;
     next();
   } catch (error) {
     return res.status(401).json({

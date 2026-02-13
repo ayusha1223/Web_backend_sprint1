@@ -5,8 +5,6 @@ import admin from "../middlewares/admin.middleware";
 import upload from "../middlewares/upload.middleware";
 import { DashboardController } from "../controllers/admin/dashboard.controller";
 
-
-
 const router = Router();
 const adminUserController = new AdminUserController();
 const dashboardController = new DashboardController();

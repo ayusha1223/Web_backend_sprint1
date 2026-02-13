@@ -7,6 +7,7 @@ import Payment from "../models/payment.model";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
+import { sendResetEmail } from "../services/email.service";
 
 
 

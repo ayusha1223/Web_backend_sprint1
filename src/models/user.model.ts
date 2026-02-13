@@ -43,11 +43,17 @@ const UserSchema: Schema<IUser> = new Schema(
       required: true,
       unique: true,
     },
-    phone: {
+  //   phone: {
+  // type: String,
+  // required: true,
+  // unique: true, 
+// },
+phone: {
   type: String,
-  required: true,
-  unique: true, 
+  required: false,
+  unique: false,
 },
+
     password: {
       type: String,
       required: true,
