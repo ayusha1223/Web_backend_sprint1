@@ -9,8 +9,6 @@ import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import { sendResetEmail } from "../services/email.service";
 
-
-
 /**
  * ⚠️ IMPORTANT
  * - register & login are KEPT AS-IS (your existing working code)
@@ -190,7 +188,10 @@ static async getProfile(req: any, res: Response) {
 
     // PASSWORD
     if (req.body.newPassword) {
-      const bcrypt = await import("bcryptjs");
+      updateData.password = await bcrypt.hash(
+  req.body.newPassword,
+  10
+);
       updateData.password = await bcrypt.hash(
         req.body.newPassword,
         10

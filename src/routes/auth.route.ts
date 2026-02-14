@@ -27,12 +27,4 @@ router.put(
 router.post("/forgot-password", AuthController.forgotPassword);
 router.post("/reset-password", AuthController.resetPassword);
 
-router.put(
-  "/:id",
-  authMiddleware,
-  upload.single("image"),
-  AuthController.updateProfile
-);
-
-
 export default router;

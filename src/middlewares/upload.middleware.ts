@@ -1,48 +1,27 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { Request } from "express";
 
-import { v4 as uuidv4 } from "uuid";
-import { HttpError } from "../errors/http-error";
+const uploadPath = path.join(process.cwd(), "uploads");
 
-// Storage configuration
+// 🔥 Make sure uploads folder exists
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(process.cwd(), "uploads");
-
-    // Create uploads folder if it does not exist
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-
     cb(null, uploadPath);
   },
-
   filename: (req, file, cb) => {
-    const uniqueName = uuidv4() + "-" + file.originalname;
+    // 🔥 Ignore original filename completely
+    const uniqueName =
+      Date.now() + "-" + Math.round(Math.random() * 1e9) + ".jpg";
+
     cb(null, uniqueName);
   },
 });
 
-// Allow only image files
-const fileFilter = (
-  req: Request,
-  file: Express.Multer.File,
-  cb: multer.FileFilterCallback
-) => {
-  if (file.mimetype.startsWith("image")) {
-    cb(null, true);
-  } else {
-    cb(new HttpError(400, "Only image files are allowed"));
-  }
-};
-
-// Multer instance
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter,
-});
+const upload = multer({ storage });
 
 export default upload;
