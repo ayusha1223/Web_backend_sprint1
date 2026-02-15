@@ -5,56 +5,57 @@ import Payment from "../models/payment.model";
 export class OrderController {
 
   static async createOrder(req: Request, res: Response) {
-    try {
-      const {
-        userId,
-        items,
-        totalAmount,
-        paymentMethod,
-        address,
-      } = req.body;
+  try {
+    const userId = req.user.id; // 🔥 from auth middleware
 
-      if (!userId || !items || !totalAmount) {
-        return res.status(400).json({
-          success: false,
-          message: "Missing required fields",
-        });
-      }
+    const {
+      items,
+      totalAmount,
+      paymentMethod,
+      address,
+    } = req.body;
 
-      // 1️⃣ Create Order
-      const order = await Order.create({
-        userId,
-        items,
-        totalAmount,
-        paymentMethod,
-        paymentStatus:
-          paymentMethod === "COD" ? "Pending" : "Paid",
-        address,
-      });
-
-      // 2️⃣ Create Payment
-      await Payment.create({
-        orderId: order._id,
-        userId,
-        amount: totalAmount,
-        method: paymentMethod,
-        status:
-          paymentMethod === "COD" ? "Pending" : "Paid",
-      });
-
-      return res.status(201).json({
-        success: true,
-        data: order,
-      });
-
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({
+    if (!items || !totalAmount) {
+      return res.status(400).json({
         success: false,
-        message: "Order creation failed",
+        message: "Missing required fields",
       });
     }
+
+    // 🔹 Create Order
+    const order = await Order.create({
+      userId,
+      items,
+      totalAmount,
+      paymentMethod,
+      paymentStatus:
+        paymentMethod === "COD" ? "Pending" : "Paid",
+      address,
+    });
+
+    // 🔹 Create Payment
+    await Payment.create({
+      orderId: order._id,
+      userId,
+      amount: totalAmount,
+      method: paymentMethod,
+      status:
+        paymentMethod === "COD" ? "Pending" : "Paid",
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: order,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Order creation failed",
+    });
   }
+}
 
   // 🔥 ADMIN - GET ALL ORDERS
   static async getAllOrders(req: Request, res: Response) {

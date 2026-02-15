@@ -4,13 +4,14 @@ import auth from "../middlewares/auth.middleware";
 import admin from "../middlewares/admin.middleware";
 
 const router = Router();
-const controller = new PaymentController();
 
+// 🔐 Only logged-in admins can access payments
 router.use(auth);
 router.use(admin);
 
-router.post("/", controller.create.bind(controller));
-router.get("/", controller.getAll.bind(controller));
-router.put("/:id", controller.updateStatus.bind(controller));
+// 🔥 Use static methods directly (NO instance, NO bind)
+router.post("/", PaymentController.create);
+router.get("/", PaymentController.getAll);
+router.put("/:id", PaymentController.updateStatus);
 
 export default router;
