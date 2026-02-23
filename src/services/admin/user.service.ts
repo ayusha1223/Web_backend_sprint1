@@ -3,30 +3,30 @@ import { CreateUserDTO, UpdateUserDTO } from "../../dtos/user.dto";
 import { UserRepository } from "../../repositories/user.repository";
 import { HttpError } from "../../errors/http-error";
 
-
 const userRepository = new UserRepository();
 
 export class AdminUserService {
 
+  /* ================= CREATE USER ================= */
   async createUser(data: CreateUserDTO) {
-    // check email
+
     const emailExists = await userRepository.getUserByEmail(data.email);
     if (emailExists) {
       throw new HttpError(403, "Email already in use");
     }
 
-    // hash password
     const hashedPassword = await bcrypt.hash(data.password, 10);
     data.password = hashedPassword;
 
-    const newUser = await userRepository.createUser(data);
-    return newUser;
+    return await userRepository.createUser(data);
   }
 
+  /* ================= GET ALL USERS ================= */
   async getAllUsers(page: number, limit: number) {
-  return await userRepository.getAllUsers(page, limit);
-}
+    return await userRepository.getAllUsers(page, limit);
+  }
 
+  /* ================= GET USER BY ID ================= */
   async getUserById(id: string) {
     const user = await userRepository.getUserById(id);
     if (!user) {
@@ -35,15 +35,34 @@ export class AdminUserService {
     return user;
   }
 
+  /* ================= UPDATE USER ================= */
   async updateUser(id: string, updateData: UpdateUserDTO) {
-    const user = await userRepository.getUserById(id);
-    if (!user) {
+
+    const existingUser = await userRepository.getUserById(id);
+    if (!existingUser) {
       throw new HttpError(404, "User not found");
+    }
+
+    /* ===== CHECK EMAIL CHANGE ===== */
+    if (updateData.email && updateData.email !== existingUser.email) {
+      const emailExists = await userRepository.getUserByEmail(updateData.email);
+      if (emailExists) {
+        throw new HttpError(403, "Email already in use");
+      }
+    }
+
+    /* ===== HASH PASSWORD IF PROVIDED ===== */
+    if (updateData.password && updateData.password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(updateData.password, 10);
+      updateData.password = hashedPassword;
+    } else {
+      delete updateData.password; // don't overwrite with empty
     }
 
     return await userRepository.updateUser(id, updateData);
   }
 
+  /* ================= DELETE USER ================= */
   async deleteUser(id: string) {
     const user = await userRepository.getUserById(id);
     if (!user) {

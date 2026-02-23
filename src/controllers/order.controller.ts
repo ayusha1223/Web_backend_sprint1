@@ -66,25 +66,38 @@ export class OrderController {
   }
 }
 
-  // 🔥 ADMIN - GET ALL ORDERS
-  static async getAllOrders(req: Request, res: Response) {
-    try {
-      const orders = await Order.find()
-        .populate("userId", "email name")
-        .sort({ createdAt: -1 });
+static async getAllOrders(req: Request, res: Response) {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
-      res.json({
-        success: true,
-        data: orders,
-      });
+    const skip = (page - 1) * limit;
 
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch orders",
-      });
-    }
+    const totalOrders = await Order.countDocuments();
+
+    const orders = await Order.find()
+      .populate("userId", "email name")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      success: true,
+      data: orders,
+      pagination: {
+        total: totalOrders,
+        page,
+        pages: Math.ceil(totalOrders / limit),
+      },
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+    });
   }
+}
   static async getMyOrders(req: any, res: any) {
   try {
     const userId = req.user.id; // comes from JWT

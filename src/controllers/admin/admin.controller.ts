@@ -104,40 +104,50 @@ async getAllUsers(req: Request, res: Response, next: NextFunction) {
   }
 }
   // PUT /api/admin/users/:id
-  async updateUser(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userId = req.params.id;
+  // PUT /api/admin/users/:id
+async updateUser(req: Request, res: Response) {
+  try {
+    const userId = req.params.id;
 
-      const parsedData = UpdateUserDTO.safeParse(req.body);
+    const updateData: any = {
+      name: req.body.name,
+      email: req.body.email,
+      role: req.body.role,
+      phone: req.body.phone,
+    };
 
-      if (!parsedData.success) {
-        return res.status(400).json({
-          success: false,
-          message: z.prettifyError(parsedData.error),
-        });
-      }
-
-      if (req.file) {
-        parsedData.data.imageUrl = `/uploads/${req.file.filename}`;
-      }
-
-      const updatedUser = await adminUserService.updateUser(
-        userId,
-        parsedData.data
-      );
-
-      return res.status(200).json({
-        success: true,
-        message: "User Updated",
-        data: updatedUser,
-      });
-    } catch (error: any) {
-      return res.status(error.statusCode ?? 500).json({
-        success: false,
-        message: error.message || "Internal Server Error",
-      });
+    // Password (only if provided and not empty)
+    if (req.body.password && req.body.password.trim() !== "") {
+      const bcrypt = require("bcryptjs");
+      updateData.password = await bcrypt.hash(req.body.password, 10);
     }
+
+    // Image
+    if (req.file) {
+      updateData.imageUrl = `/uploads/${req.file.filename}`;
+    }
+
+    console.log("REQ BODY:", req.body);
+console.log("REQ FILE:", req.file);
+
+    const updatedUser = await adminUserService.updateUser(
+      userId,
+      updateData
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "User Updated",
+      data: updatedUser,
+    });
+
+  } catch (error: any) {
+    return res.status(error.statusCode ?? 500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
   }
+}
 
   // DELETE /api/admin/users/:id
   async deleteUser(req: Request, res: Response, next: NextFunction) {

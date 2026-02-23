@@ -4,7 +4,7 @@ import z from "zod";
 const UserSchema = z.object({
   name: z.string().min(2).optional(),
   email: z.string().email().optional(),
-  password: z.string().min(6).optional(),
+  password: z.string().min(6).or(z.literal("")).optional(),
   role: z.enum(["admin", "user"]).optional(),
   imageUrl: z.string().optional(),
 });

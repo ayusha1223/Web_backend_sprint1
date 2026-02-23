@@ -6,7 +6,6 @@ export interface IUserRepository {
   createUser(userData: Partial<IUser>): Promise<IUser>;
   getUserById(id: string): Promise<IUser | null>;
 
-  // ✅ UPDATED: Pagination Support
   getAllUsers(
     page: number,
     limit: number
@@ -43,7 +42,6 @@ export class UserRepository implements IUserRepository {
     return await User.findById(id).select("-password");
   }
 
-  // ✅ PAGINATION IMPLEMENTED HERE
   async getAllUsers(page: number, limit: number) {
     const skip = (page - 1) * limit;
 
@@ -53,7 +51,7 @@ export class UserRepository implements IUserRepository {
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
-      .select("-password"); // 🔥 never return password
+      .select("-password");
 
     return {
       users,
@@ -66,14 +64,30 @@ export class UserRepository implements IUserRepository {
     };
   }
 
+  /* ✅ SAFE UPDATE */
   async updateUser(
     id: string,
     updateData: Partial<IUser>
   ): Promise<IUser | null> {
-    return await User.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
+
+    // Remove undefined fields
+    const cleanData: any = {};
+
+    Object.keys(updateData).forEach((key) => {
+      const value = (updateData as any)[key];
+      if (value !== undefined && value !== null) {
+        cleanData[key] = value;
+      }
+    });
+
+    return await User.findByIdAndUpdate(
+      id,
+      { $set: cleanData },  // 🔥 IMPORTANT
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select("-password");
   }
 
   async deleteUser(id: string): Promise<boolean> {

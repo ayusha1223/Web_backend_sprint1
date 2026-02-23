@@ -1,51 +1,107 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { AdminUserController } from "../controllers/admin/admin.controller";
+import { DashboardController } from "../controllers/admin/dashboard.controller";
 import auth from "../middlewares/auth.middleware";
 import admin from "../middlewares/admin.middleware";
 import upload from "../middlewares/upload.middleware";
-import { DashboardController } from "../controllers/admin/dashboard.controller";
+import User from "../models/user.model"; // ✅ IMPORTANT
 
 const router = Router();
 const adminUserController = new AdminUserController();
 const dashboardController = new DashboardController();
 
-// 🔐 Apply middlewares once (sir-style)
+/* 🔐 Apply middlewares globally */
 router.use(auth);
 router.use(admin);
 
-// POST /api/admin/users
-router.post(
-  "/users",
+/* ===============================
+   ADMIN SELF PROFILE UPDATE
+   PUT /api/admin/profile
+================================ */
+router.put(
+  "/profile",
   upload.single("image"),
-  adminUserController.createUser.bind(adminUserController)
+  async (req: any, res: Response) => {
+    try {
+      const adminId = req.user.id; // From auth middleware
+      const { name } = req.body;
+      const image = req.file;
+
+      const adminUser = await User.findById(adminId);
+
+      if (!adminUser) {
+        return res.status(404).json({
+          success: false,
+          message: "Admin not found",
+        });
+      }
+
+      // Update fields
+      if (name) adminUser.name = name;
+      if (image) {
+        adminUser.image = `/uploads/${image.filename}`;
+      }
+
+      await adminUser.save();
+
+      return res.json({
+        success: true,
+        message: "Profile updated successfully",
+        data: adminUser,
+      });
+    } catch (error) {
+      console.error("Admin profile update error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Server error",
+      });
+    }
+  }
 );
-// GET /api/admin/dashboard
+
+/* ===============================
+   DASHBOARD
+   GET /api/admin/dashboard
+================================ */
 router.get(
   "/dashboard",
   dashboardController.getDashboard.bind(dashboardController)
 );
 
+/* ===============================
+   CREATE USER
+   POST /api/admin/users
+================================ */
+router.post(
+  "/users",
+  upload.single("image"),
+  adminUserController.createUser.bind(adminUserController)
+);
 
-// GET /api/admin/users
+/* ===============================
+   GET ALL USERS
+================================ */
 router.get(
   "/users",
   adminUserController.getAllUsers.bind(adminUserController)
 );
 
-// GET /api/admin/users/:id
+/* ===============================
+   GET SINGLE USER
+================================ */
 router.get(
   "/users/:id",
   adminUserController.getUserById.bind(adminUserController)
 );
-
-// PUT /api/admin/users/:id
 router.put(
   "/users/:id",
   upload.single("image"),
   adminUserController.updateUser.bind(adminUserController)
 );
 
-// DELETE /api/admin/users/:id
+/* ===============================
+   DELETE USER
+================================ */
 router.delete(
   "/users/:id",
   adminUserController.deleteUser.bind(adminUserController)
