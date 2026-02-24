@@ -12,4 +12,7 @@ export class AuthRepository {
   static createUser(data: any) {
     return User.create(data);
   }
+   static async findById(id: string) {
+    return User.findById(id);
+  }
 }

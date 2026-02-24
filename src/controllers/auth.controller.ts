@@ -27,6 +27,11 @@ export class AuthController {
       return res.status(400).json({ message: err.message });
     }
   }
+  static async getMe(req: any, res: any) {
+  const userId = req.user.id; // from JWT middleware
+  const user = await AuthService.getCurrentUser(userId);
+  res.json(user);
+}
 
   // ✅ KEEP AS IT IS (DO NOT CHANGE)
   static async login(req: Request, res: Response) {
@@ -167,7 +172,7 @@ static async getProfile(req: any, res: Response) {
   }
 }
   // 🆕 PUT /api/auth/profile  (sir-style addition + multer)
- static async updateProfile(req: any, res: Response) {
+static async updateProfile(req: any, res: Response) {
   try {
     const userId = req.user?.id || req.user?._id;
     if (!userId) {
@@ -176,31 +181,35 @@ static async getProfile(req: any, res: Response) {
 
     const updateData: any = {};
 
-    // NAME
+    /* ================= NAME ================= */
     if (req.body.name) {
       updateData.name = req.body.name;
     }
 
-    // PHONE
+    /* ================= PHONE ================= */
     if (req.body.phone) {
       updateData.phone = req.body.phone;
     }
 
-    // PASSWORD
+    /* ================= PASSWORD ================= */
     if (req.body.newPassword) {
-      updateData.password = await bcrypt.hash(
-  req.body.newPassword,
-  10
-);
-      updateData.password = await bcrypt.hash(
-        req.body.newPassword,
-        10
-      );
+      updateData.password = await bcrypt.hash(req.body.newPassword, 10);
     }
 
-    // IMAGE
+    /* ================= IMAGE ================= */
     if (req.file) {
       updateData.image = `/uploads/${req.file.filename}`;
+    }
+
+    /* ================= NOTIFICATIONS ================= */
+    if (req.body.notifications) {
+      try {
+        updateData.notifications = JSON.parse(req.body.notifications);
+      } catch (error) {
+        return res.status(400).json({
+          message: "Invalid notifications format",
+        });
+      }
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -208,7 +217,7 @@ static async getProfile(req: any, res: Response) {
       updateData,
       {
         new: true,
-        runValidators: true, // 🔥 IMPORTANT
+        runValidators: true,
       }
     ).select("-password");
 
@@ -217,8 +226,9 @@ static async getProfile(req: any, res: Response) {
       message: "Profile updated successfully",
       data: updatedUser,
     });
+
   } catch (err: any) {
-    console.error("PROFILE UPDATE ERROR:", err); // 🔥 ADD THIS
+    console.error("PROFILE UPDATE ERROR:", err);
     return res.status(400).json({ message: err.message });
   }
 }

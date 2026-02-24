@@ -15,6 +15,13 @@ export interface IUser extends Document {
   updatedAt: Date;
   resetToken?: string;
 resetTokenExpiry?: Date;
+notifications?: {
+    emailNotifications: boolean;
+    smsNotifications: boolean;
+    saleAlerts: boolean;
+    orderUpdates: boolean;
+    promotionalOffers: boolean;
+  };
 
 }
 
@@ -75,8 +82,28 @@ phone: {
 resetTokenExpiry: {
   type: Date,
 },
-
-
+notifications: {
+  emailNotifications: {
+    type: Boolean,
+    default: true,
+  },
+  smsNotifications: {
+    type: Boolean,
+    default: false,
+  },
+  saleAlerts: {
+    type: Boolean,
+    default: true,
+  },
+  orderUpdates: {
+    type: Boolean,
+    default: true,
+  },
+  promotionalOffers: {
+    type: Boolean,
+    default: false,
+  },
+},
     // ➕ SIR-STYLE FIELD
     imageUrl: {
       type: String,

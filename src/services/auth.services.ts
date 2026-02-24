@@ -14,8 +14,19 @@ export class AuthService {
       password: hashedPassword,
     });
   }
+static async getCurrentUser(userId: string) {
+  const user = await AuthRepository.findById(userId);
+  if (!user) throw new Error("User not found");
 
-  static async login(data: any) {
+  return {
+    id: user._id,
+    email: user.email,
+    role: user.role,
+    name: user.name,
+    image: user.imageUrl || user.image,
+  };
+}
+ static async login(data: any) {
   const user = await AuthRepository.findByEmail(data.email);
   if (!user) throw new Error("Invalid credentials");
 
@@ -39,6 +50,12 @@ export class AuthService {
       id: user._id,
       role: user.role,
       email: user.email,
+    name: user.name,
+    firstName: user.firstName,
+    lastName: user.lastName,
+
+    // ✅ Image (prefer imageUrl, fallback to image)
+    image: user.imageUrl || user.image, // ✅ ADD THIS
     },
   };
 }

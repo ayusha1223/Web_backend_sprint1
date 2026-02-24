@@ -16,6 +16,7 @@ router.get(
   authMiddleware,
   AuthController.getProfile
 );
+router.get("/me", authMiddleware, AuthController.getMe);
 
 // 🆕 UPDATE logged-in user profile (sir-style + multer)
 router.put(
