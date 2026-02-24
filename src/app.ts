@@ -4,6 +4,8 @@ import cors from "cors";
 import path from "path";
 import cookieParser from "cookie-parser";
 
+import reverseRoute from "./routes/reverse.route";
+
 // ROUTES
 import paymentRoutes from "./routes/payment.route";
 import authRoutes from "./routes/auth.route";
@@ -18,10 +20,7 @@ const app = express();
 
 /* ================== MIDDLEWARE ================== */
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
+// ✅ MOVE CORS HERE (VERY TOP)
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -29,8 +28,13 @@ app.use(
   })
 );
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
 /* ================== ROUTES ================== */
 
+app.use("/api", reverseRoute);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
