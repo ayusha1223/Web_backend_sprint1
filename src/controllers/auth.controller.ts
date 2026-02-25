@@ -196,9 +196,11 @@ static async updateProfile(req: any, res: Response) {
       updateData.password = await bcrypt.hash(req.body.newPassword, 10);
     }
 
+    console.log("REQ FILE:", req.file);
+
     /* ================= IMAGE ================= */
     if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
+      updateData.imageUrl = `/uploads/${req.file.filename}`;
     }
 
     /* ================= NOTIFICATIONS ================= */

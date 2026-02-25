@@ -1,22 +1,24 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import z from "zod";
 import {
-  CreateUserDTO,
+  AdminCreateUserDTO,
   UpdateUserDTO
 } from "../../dtos/user.dto";
 import { AdminUserService } from "../../services/admin/user.service";
 import Order from "../../models/order.model";
 import Payment from "../../models/payment.model";
 
-
 const adminUserService = new AdminUserService();
 
 export class AdminUserController {
 
-  // POST /api/admin/users
-  async createUser(req: Request, res: Response, next: NextFunction) {
+  /* ===============================
+     CREATE USER
+     POST /api/admin/users
+  =============================== */
+  async createUser(req: Request, res: Response) {
     try {
-      const parsedData = CreateUserDTO.safeParse(req.body);
+      const parsedData = AdminCreateUserDTO.safeParse(req.body);
 
       if (!parsedData.success) {
         return res.status(400).json({
@@ -25,18 +27,21 @@ export class AdminUserController {
         });
       }
 
+      const userData = parsedData.data;
+
+      // Attach uploaded image
       if (req.file) {
-        parsedData.data.imageUrl = `/uploads/${req.file.filename}`;
+        userData.imageUrl = `/uploads/${req.file.filename}`;
       }
 
-      const userData = parsedData.data;
       const newUser = await adminUserService.createUser(userData);
 
       return res.status(201).json({
         success: true,
-        message: "User Created",
+        message: "User Created Successfully",
         data: newUser,
       });
+
     } catch (error: any) {
       return res.status(error.statusCode ?? 500).json({
         success: false,
@@ -45,114 +50,130 @@ export class AdminUserController {
     }
   }
 
-  // GET /api/admin/users
-  // GET /api/admin/users
-async getAllUsers(req: Request, res: Response, next: NextFunction) {
-  try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 5;
+  /* ===============================
+     GET ALL USERS (Pagination)
+     GET /api/admin/users
+  =============================== */
+  async getAllUsers(req: Request, res: Response) {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 5;
 
-    const result = await adminUserService.getAllUsers(page, limit);
+      const result = await adminUserService.getAllUsers(page, limit);
 
-    return res.status(200).json({
-      success: true,
-      message: "All Users Retrieved",
-      data: result.users,
-      pagination: result.pagination,
-    });
+      return res.status(200).json({
+        success: true,
+        message: "Users Retrieved Successfully",
+        data: result.users,
+        pagination: result.pagination,
+      });
 
-  } catch (error: any) {
-    return res.status(error.statusCode ?? 500).json({
-      success: false,
-      message: error.message || "Internal Server Error",
-    });
-  }
-}
-
-  // GET /api/admin/users/:id
-  async getUserById(req: Request, res: Response, next: NextFunction) {
-  try {
-    const userId = req.params.id;
-
-    const user = await adminUserService.getUserById(userId);
-
-    if (!user) {
-      return res.status(404).json({
+    } catch (error: any) {
+      return res.status(error.statusCode ?? 500).json({
         success: false,
-        message: "User not found",
+        message: error.message || "Internal Server Error",
       });
     }
-
-    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
-    const payments = await Payment.find({ userId }).sort({ createdAt: -1 });
-
-    return res.status(200).json({
-      success: true,
-      message: "Single User Retrieved",
-      data: {
-        user,
-        orders,
-        payments,
-      },
-    });
-
-  } catch (error: any) {
-    return res.status(error.statusCode ?? 500).json({
-      success: false,
-      message: error.message || "Internal Server Error",
-    });
   }
-}
-  // PUT /api/admin/users/:id
-  // PUT /api/admin/users/:id
-async updateUser(req: Request, res: Response) {
-  try {
-    const userId = req.params.id;
 
-    const updateData: any = {
-      name: req.body.name,
-      email: req.body.email,
-      role: req.body.role,
-      phone: req.body.phone,
-    };
-
-    // Password (only if provided and not empty)
-    if (req.body.password && req.body.password.trim() !== "") {
-      const bcrypt = require("bcryptjs");
-      updateData.password = await bcrypt.hash(req.body.password, 10);
-    }
-
-    // Image
-    if (req.file) {
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
-    }
-
-    console.log("REQ BODY:", req.body);
-console.log("REQ FILE:", req.file);
-
-    const updatedUser = await adminUserService.updateUser(
-      userId,
-      updateData
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: "User Updated",
-      data: updatedUser,
-    });
-
-  } catch (error: any) {
-    return res.status(error.statusCode ?? 500).json({
-      success: false,
-      message: error.message || "Internal Server Error",
-    });
-  }
-}
-
-  // DELETE /api/admin/users/:id
-  async deleteUser(req: Request, res: Response, next: NextFunction) {
+  /* ===============================
+     GET SINGLE USER
+     GET /api/admin/users/:id
+  =============================== */
+  async getUserById(req: Request, res: Response) {
     try {
       const userId = req.params.id;
+
+      const user = await adminUserService.getUserById(userId);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+      const payments = await Payment.find({ userId }).sort({ createdAt: -1 });
+
+      return res.status(200).json({
+        success: true,
+        message: "User Retrieved Successfully",
+        data: {
+          user,
+          orders,
+          payments,
+        },
+      });
+
+    } catch (error: any) {
+      return res.status(error.statusCode ?? 500).json({
+        success: false,
+        message: error.message || "Internal Server Error",
+      });
+    }
+  }
+
+  /* ===============================
+     UPDATE USER
+     PUT /api/admin/users/:id
+  =============================== */
+  async updateUser(req: Request, res: Response) {
+    try {
+      const userId = req.params.id;
+
+      const updateData: any = {};
+
+      if (req.body.name) updateData.name = req.body.name;
+      if (req.body.email) updateData.email = req.body.email;
+      if (req.body.role) updateData.role = req.body.role;
+      if (req.body.phone) updateData.phone = req.body.phone;
+
+      // Hash password only if provided
+      if (req.body.password && req.body.password.trim() !== "") {
+        const bcrypt = require("bcryptjs");
+        updateData.password = await bcrypt.hash(req.body.password, 10);
+      }
+
+      // Attach new image
+      if (req.file) {
+        updateData.imageUrl = `/uploads/${req.file.filename}`;
+      }
+
+      const updatedUser = await adminUserService.updateUser(
+        userId,
+        updateData
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "User Updated Successfully",
+        data: updatedUser,
+      });
+
+    } catch (error: any) {
+      return res.status(error.statusCode ?? 500).json({
+        success: false,
+        message: error.message || "Internal Server Error",
+      });
+    }
+  }
+
+  /* ===============================
+     DELETE USER
+     DELETE /api/admin/users/:id
+  =============================== */
+  async deleteUser(req: Request, res: Response) {
+    try {
+      const userId = req.params.id;
+
       const deleted = await adminUserService.deleteUser(userId);
 
       if (!deleted) {
@@ -164,8 +185,9 @@ console.log("REQ FILE:", req.file);
 
       return res.status(200).json({
         success: true,
-        message: "User Deleted",
+        message: "User Deleted Successfully",
       });
+
     } catch (error: any) {
       return res.status(error.statusCode ?? 500).json({
         success: false,

@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { CreateUserDTO, UpdateUserDTO } from "../../dtos/user.dto";
+import { AdminCreateUserDTO, UpdateUserDTO } from "../../dtos/user.dto";
 import { UserRepository } from "../../repositories/user.repository";
 import { HttpError } from "../../errors/http-error";
 
@@ -8,7 +8,7 @@ const userRepository = new UserRepository();
 export class AdminUserService {
 
   /* ================= CREATE USER ================= */
-  async createUser(data: CreateUserDTO) {
+  async createUser(data: AdminCreateUserDTO) {
 
     const emailExists = await userRepository.getUserByEmail(data.email);
     if (emailExists) {

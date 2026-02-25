@@ -1,25 +1,42 @@
 import z from "zod";
 
-
+/* ===============================
+   BASE USER SCHEMA
+================================ */
 const UserSchema = z.object({
   name: z.string().min(2).optional(),
   email: z.string().email().optional(),
   password: z.string().min(6).or(z.literal("")).optional(),
   role: z.enum(["admin", "user"]).optional(),
   imageUrl: z.string().optional(),
+  phone: z.string().optional(),
 });
 
-/**
- * CREATE USER (Admin / Register extension)
- */
-export const CreateUserDTO = z
+/* ===============================
+   ADMIN CREATE USER DTO
+   Used in: /api/admin/users
+================================ */
+export const AdminCreateUserDTO = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(6),
+  role: z.enum(["admin", "user"]).optional(),
+  imageUrl: z.string().optional(),
+  phone: z.string().optional(),
+});
+
+export type AdminCreateUserDTO = z.infer<typeof AdminCreateUserDTO>;
+
+/* ===============================
+   REGISTER USER DTO (Public)
+   Used in: /api/auth/register
+================================ */
+export const RegisterUserDTO = z
   .object({
     name: z.string().min(2),
     email: z.string().email(),
     password: z.string().min(6),
     confirmPassword: z.string().min(6),
-    role: z.enum(["admin", "user"]).optional(),
-    imageUrl: z.string().optional(),
     phone: z.string().min(5),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -27,11 +44,11 @@ export const CreateUserDTO = z
     path: ["confirmPassword"],
   });
 
-export type CreateUserDTO = z.infer<typeof CreateUserDTO>;
+export type RegisterUserDTO = z.infer<typeof RegisterUserDTO>;
 
-/**
- * LOGIN USER (Admin / alt login usage)
- */
+/* ===============================
+   LOGIN USER DTO
+================================ */
 export const LoginUserDTO = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -39,8 +56,8 @@ export const LoginUserDTO = z.object({
 
 export type LoginUserDTO = z.infer<typeof LoginUserDTO>;
 
-/**
- * UPDATE USER (Profile / Admin update)
- */
+/* ===============================
+   UPDATE USER DTO
+================================ */
 export const UpdateUserDTO = UserSchema.partial();
 export type UpdateUserDTO = z.infer<typeof UpdateUserDTO>;
