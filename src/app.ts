@@ -13,6 +13,7 @@ import adminRoutes from "./routes/admin.route";
 import cartRoutes from "./routes/cart.route";
 import orderRoutes from "./routes/order.route";
 import productRoutes from "./routes/product.routes";
+import notificationRoutes from "./routes/notification.route";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use("/api/notifications", notificationRoutes);
 
 /* ================== ROUTES ================== */
 

@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import Order from "../models/order.model";
 import Payment from "../models/payment.model";
-
+import { transporter } from "../config/email";
+import Notification from "../models/notification.model";
 export class OrderController {
 
   static async createOrder(req: Request, res: Response) {
@@ -157,41 +158,6 @@ static async updateOrderStatus(req: Request, res: Response) {
     const { orderId } = req.params;
     const { status } = req.body;
 
-    const order = await Order.findById(orderId);
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
-
-    order.orderStatus = status;
-
-    // If refunded, update payment status
-    if (status === "Refunded") {
-      order.paymentStatus = "Paid"; // already paid
-    }
-
-    await order.save();
-
-    return res.json({
-      success: true,
-      message: "Order status updated",
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Failed to update order",
-    });
-  }
-}
-    // 🔥 GET SINGLE ORDER
-static async getOrderById(req: Request, res: Response) {
-  try {
-    const { orderId } = req.params;
-
     const order = await Order.findById(orderId)
       .populate("userId", "email name");
 
@@ -202,17 +168,86 @@ static async getOrderById(req: Request, res: Response) {
       });
     }
 
-    res.json({
+    order.orderStatus = status;
+    await order.save();
+
+    const user: any = order.userId;
+
+    const normalizedStatus = status?.toLowerCase();
+
+    if (normalizedStatus === "shipped" || normalizedStatus === "delivered") {
+
+      const message =
+        normalizedStatus === "shipped"
+          ? "Your order has been shipped 🚚"
+          : "Your order has been delivered 📦";
+
+      // 🔔 Save notification
+      await Notification.create({
+        userId: user._id,
+        message,
+      });
+
+      try {
+        await transporter.sendMail({
+          from: `"Naayu Attire" <${process.env.EMAIL_USER}>`,
+          to: user.email,
+          subject: "Order Update - Naayu Attire",
+          html: `
+            <h2>Hello ${user.name}</h2>
+            <p>${message}</p>
+            <p>Order ID: ${order._id}</p>
+            <p>Thank you for shopping with us 💖</p>
+          `,
+        });
+
+        console.log("Order email sent successfully ✅");
+
+      } catch (mailError) {
+        console.error("Order email failed ❌:", mailError);
+      }
+    }
+
+    return res.json({
       success: true,
-      data: order,
+      message: "Order status updated",
     });
 
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       success: false,
-      message: "Failed to fetch order",
+      message: "Order status update failed",
     });
   }
 }
+
+  // 🔥 GET SINGLE ORDER
+  static async getOrderById(req: Request, res: Response) {
+    try {
+      const { orderId } = req.params;
+
+      const order = await Order.findById(orderId)
+        .populate("userId", "email name");
+
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "Order not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        data: order,
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch order",
+      });
+    }
   }
+}
 
