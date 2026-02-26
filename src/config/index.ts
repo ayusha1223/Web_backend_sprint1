@@ -1,5 +1,7 @@
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({
+  path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
+});
 
 // Server Port
 export const PORT: number =
@@ -7,7 +9,7 @@ export const PORT: number =
 
 // MongoDB connection string
 export const MONGODB_URI: string =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/defaultdb";
+  process.env.MONGO_URI || "mongodb://localhost:27017/defaultdb";
 
 // JWT Secret
 export const JWT_SECRET: string =
