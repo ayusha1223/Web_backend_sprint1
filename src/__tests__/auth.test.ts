@@ -1,13 +1,30 @@
-import request from "supertest";
 
+
+import request from "supertest";
 import mongoose from "mongoose";
+/* 🔥 ADD THIS MOCK FIRST */
+jest.mock("../services/email.service", () => ({
+  sendResetEmail: jest.fn().mockResolvedValue(true),
+}));
 import app from "../app";
 import User from "../models/user.model";
-
+import { connectDB } from "../database"; // adjust path if needed
 
 let userToken: string;
 let adminToken: string;
 let userId: string;
+let uniqueEmail: string;
+
+/* ================= DB CONNECTION ================= */
+
+beforeAll(async () => {
+  process.env.NODE_ENV = "test";
+  await connectDB();
+});
+
+afterAll(async () => {
+  await mongoose.connection.close();
+});
 
 /* ================= AUTH TESTS ================= */
 
@@ -238,14 +255,15 @@ describe("AUTH + ADMIN INTEGRATION TESTS", () => {
   /* ================= EXTRA INTEGRATION TESTS ================= */
 
 it("2️⃣2️⃣ should create user as admin", async () => {
+  uniqueEmail = `newuser${Date.now()}@test.com`;  // ✅ ASSIGN VALUE
   const res = await request(app)
     .post("/api/admin/users")
     .set("Authorization", `Bearer ${adminToken}`)
     .send({
       name: "New User",
-      email: "newuser@test.com",
+      email: uniqueEmail,
       password: "123456",
-      confirmPassword: "123456",   // 🔥 REQUIRED
+         // 🔥 REQUIRED
       phone: "9999999999",         // optional for DTO but safe for schema
       role: "user"
     });
@@ -257,7 +275,7 @@ it("2️⃣3️⃣ should fail create user without admin role", async () => {
   const login = await request(app)
     .post("/api/auth/login")
     .send({
-      email: "newuser@test.com",
+      email: uniqueEmail,
       password: "123456"
     });
 
@@ -268,7 +286,7 @@ it("2️⃣3️⃣ should fail create user without admin role", async () => {
     .set("Authorization", `Bearer ${normalToken}`)
     .send({
       name: "Fail User",
-      email: "fail@test.com",
+      email: `fail${Date.now()}@test.com`,
       password: "123456",
       phone: "8888888888"
     });
