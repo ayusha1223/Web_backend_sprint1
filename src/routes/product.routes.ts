@@ -7,23 +7,42 @@ import upload from "../middlewares/upload.middleware";
 const router = Router();
 const controller = new ProductController();
 
-router.use(auth);
-router.use(admin);
+/* ================= PUBLIC ROUTES ================= */
+
+// GET all products
+router.get("/", controller.getAll.bind(controller));
+
+// GET by category
+router.get(
+  "/category/:category",
+  controller.getByCategory.bind(controller)
+);
+
+/* ================= ADMIN ROUTES ================= */
 
 // POST create product
 router.post(
   "/",
+  auth,
+  admin,
   upload.array("images", 5),
   controller.create.bind(controller)
 );
 
-// GET all
-router.get("/", controller.getAll.bind(controller));
-
 // PUT update
-router.put("/:id", controller.update.bind(controller));
+router.put(
+  "/:id",
+  auth,
+  admin,
+  controller.update.bind(controller)
+);
 
 // DELETE
-router.delete("/:id", controller.delete.bind(controller));
+router.delete(
+  "/:id",
+  auth,
+  admin,
+  controller.delete.bind(controller)
+);
 
 export default router;

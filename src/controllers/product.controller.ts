@@ -35,6 +35,19 @@ export class ProductController {
     );
     res.json({ success: true, data: product });
   }
+  async getByCategory(req: Request, res: Response) {
+  try {
+    const { category } = req.params;
+
+    const products = await this.service.getProductsByCategory(
+      category as string
+    );
+
+    res.json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Fetch failed" });
+  }
+}
 
   async delete(req: Request, res: Response) {
     await this.service.deleteProduct(req.params.id);
