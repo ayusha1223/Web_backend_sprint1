@@ -1,9 +1,7 @@
-jest.mock("../../../repositories/user.repository");
 jest.mock("bcryptjs");
 
 import bcrypt from "bcryptjs";
 import { AdminUserService } from "../../../services/admin/user.service";
-import { UserRepository } from "../../../repositories/user.repository";
 import { HttpError } from "../../../errors/http-error";
 
 describe("AdminUserService Unit Tests", () => {
@@ -22,9 +20,8 @@ describe("AdminUserService Unit Tests", () => {
       deleteUser: jest.fn(),
     };
 
-    (UserRepository as jest.Mock).mockImplementation(() => mockRepo);
-
-    service = new AdminUserService();
+    // ✅ Inject mock repository directly
+    service = new AdminUserService(mockRepo);
   });
 
   // ================= CREATE USER =================
@@ -144,5 +141,4 @@ describe("AdminUserService Unit Tests", () => {
     expect(mockRepo.deleteUser).toHaveBeenCalledWith("123");
     expect(result.message).toBe("Deleted");
   });
-
 });
