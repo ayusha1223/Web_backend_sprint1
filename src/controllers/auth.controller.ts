@@ -136,7 +136,6 @@ static async resetPassword(req: Request, res: Response) {
   }
 }
 
-  // 🆕 GET /api/auth/profile  (sir-style addition)
   // 🆕 GET /api/auth/whoami
 static async getProfile(req: any, res: Response) {
   try {

@@ -1,9 +1,6 @@
 import { Request, Response } from "express";
 import z from "zod";
-import {
-  AdminCreateUserDTO,
-  UpdateUserDTO
-} from "../../dtos/user.dto";
+import { AdminCreateUserDTO, UpdateUserDTO } from "../../dtos/user.dto";
 import { AdminUserService } from "../../services/admin/user.service";
 import Order from "../../models/order.model";
 import Payment from "../../models/payment.model";
