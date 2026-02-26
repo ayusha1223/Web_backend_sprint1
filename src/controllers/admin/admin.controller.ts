@@ -5,9 +5,10 @@ import { AdminUserService } from "../../services/admin/user.service";
 import Order from "../../models/order.model";
 import Payment from "../../models/payment.model";
 
-const adminUserService = new AdminUserService();
-
 export class AdminUserController {
+  constructor(
+    private adminUserService = new AdminUserService()
+  ) {}
 
   /* ===============================
      CREATE USER
@@ -31,7 +32,7 @@ export class AdminUserController {
         userData.imageUrl = `/uploads/${req.file.filename}`;
       }
 
-      const newUser = await adminUserService.createUser(userData);
+      const newUser = await this.adminUserService.createUser(userData);
 
       return res.status(201).json({
         success: true,
@@ -56,7 +57,7 @@ export class AdminUserController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
 
-      const result = await adminUserService.getAllUsers(page, limit);
+      const result = await this.adminUserService.getAllUsers(page, limit);
 
       return res.status(200).json({
         success: true,
@@ -81,7 +82,7 @@ export class AdminUserController {
     try {
       const userId = req.params.id;
 
-      const user = await adminUserService.getUserById(userId);
+      const user = await this.adminUserService.getUserById(userId);
 
       if (!user) {
         return res.status(404).json({
@@ -137,7 +138,7 @@ export class AdminUserController {
         updateData.imageUrl = `/uploads/${req.file.filename}`;
       }
 
-      const updatedUser = await adminUserService.updateUser(
+      const updatedUser = await this.adminUserService.updateUser(
         userId,
         updateData
       );
@@ -171,7 +172,7 @@ export class AdminUserController {
     try {
       const userId = req.params.id;
 
-      const deleted = await adminUserService.deleteUser(userId);
+      const deleted = await this.adminUserService.deleteUser(userId);
 
       if (!deleted) {
         return res.status(404).json({

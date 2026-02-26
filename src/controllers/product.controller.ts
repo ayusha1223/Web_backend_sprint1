@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { ProductService } from "../services/product.service";
 
 export class ProductController {
-  private service = new ProductService();
+  constructor(private service = new ProductService()) {}
 
   async create(req: Request, res: Response) {
     try {
