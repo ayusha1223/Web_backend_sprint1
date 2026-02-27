@@ -23,10 +23,17 @@ export class ProductController {
     }
   }
 
-  async getAll(req: Request, res: Response) {
-    const products = await this.service.getAllProducts();
+async getAll(req: Request, res: Response) {
+  try {
+    const { search } = req.query;
+
+    const products = await this.service.getAllProducts(search as string);
+
     res.json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Fetch failed" });
   }
+}
 
   async update(req: Request, res: Response) {
     const product = await this.service.updateProduct(

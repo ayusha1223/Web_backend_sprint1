@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Order from "../models/order.model";
 import Payment from "../models/payment.model";
-import { transporter } from "../config/email";
+import { sendOrderEmail } from "../services/email.service";
 import Notification from "../models/notification.model";
 export class OrderController {
 
@@ -189,17 +189,12 @@ static async updateOrderStatus(req: Request, res: Response) {
       });
 
       try {
-        await transporter.sendMail({
-          from: `"Naayu Attire" <${process.env.EMAIL_USER}>`,
-          to: user.email,
-          subject: "Order Update - Naayu Attire",
-          html: `
-            <h2>Hello ${user.name}</h2>
-            <p>${message}</p>
-            <p>Order ID: ${order._id}</p>
-            <p>Thank you for shopping with us 💖</p>
-          `,
-        });
+        await sendOrderEmail(
+  user.email,
+  user.name,
+  message,
+  order._id.toString()
+);
 
         console.log("Order email sent successfully ✅");
 

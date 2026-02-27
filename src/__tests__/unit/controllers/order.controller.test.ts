@@ -1,8 +1,13 @@
+jest.mock("../../../services/email.service", () => ({
+  sendOrderEmail: jest.fn().mockResolvedValue(true),
+}));
+import { sendOrderEmail } from "../../../services/email.service";
+
 import { OrderController } from "../../../controllers/order.controller";
 import Order from "../../../models/order.model";
 import Payment from "../../../models/payment.model";
 import Notification from "../../../models/notification.model";
-import { transporter } from "../../../config/email";
+
 
 jest.mock("../../../models/order.model");
 jest.mock("../../../models/payment.model");
@@ -168,6 +173,6 @@ describe("updateOrderStatus", () => {
     await OrderController.updateOrderStatus(req, res);
 
     expect(Notification.create).toHaveBeenCalled();
-    expect(transporter.sendMail).toHaveBeenCalled();
+   expect(sendOrderEmail).toHaveBeenCalled();
   });
 });

@@ -1,4 +1,5 @@
 import { ProductController } from "../../../controllers/product.controller";
+import { ProductService } from "../../../services/product.service";
 
 describe("ProductController Unit Tests", () => {
   let controller: ProductController;
@@ -71,16 +72,19 @@ describe("ProductController Unit Tests", () => {
 
   // ================= GET ALL =================
 
-  it("should return all products", async () => {
-    mockService.getAllProducts.mockResolvedValue([{ name: "P1" }]);
+it("should return all products", async () => {
+  req.query = {}; // use existing req
+  mockService.getAllProducts.mockResolvedValue([{ name: "P1" }]);
 
-    await controller.getAll(req, res);
+  await controller.getAll(req, res);
 
-    expect(res.json).toHaveBeenCalledWith({
-      success: true,
-      data: [{ name: "P1" }],
-    });
+  expect(mockService.getAllProducts).toHaveBeenCalledWith(undefined);
+
+  expect(res.json).toHaveBeenCalledWith({
+    success: true,
+    data: [{ name: "P1" }],
   });
+});
 
   // ================= UPDATE =================
 

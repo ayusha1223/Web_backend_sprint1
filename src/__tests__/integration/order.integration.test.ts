@@ -1,5 +1,11 @@
 import request from "supertest";
 import mongoose from "mongoose";
+/* 🔥 FORCE MOCK EMAIL SERVICE */
+jest.mock("../../services/email.service", () => ({
+  __esModule: true,
+  sendOrderEmail: jest.fn().mockResolvedValue(true),
+  sendResetEmail: jest.fn().mockResolvedValue(true),
+}));
 import app from "../../app";
 import { connectDB } from "../../database";
 import User from "../../models/user.model";
@@ -12,10 +18,6 @@ let orderId: string;
 beforeAll(async () => {
   process.env.NODE_ENV = "test";
   await connectDB();
-});
-
-afterAll(async () => {
-  await mongoose.connection.close();
 });
 
 describe("ORDER INTEGRATION TESTS", () => {

@@ -8,9 +8,19 @@ export class ProductService {
     return this.repo.create(data);
   }
 
-  async getAllProducts() {
-    return this.repo.findAll();
+async getAllProducts(search?: string) {
+  if (search) {
+    return await Product.find({
+      $or: [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+      ],
+    });
   }
+
+  return this.repo.findAll(); // 🔥 important
+}
 
   async getProductById(id: string) {
     return this.repo.findById(id);

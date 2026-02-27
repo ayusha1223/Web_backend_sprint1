@@ -1,14 +1,14 @@
-
-
 import request from "supertest";
 import mongoose from "mongoose";
 /* 🔥 ADD THIS MOCK FIRST */
-jest.mock("../services/email.service", () => ({
+jest.mock("../../services/email.service", () => ({
+  __esModule: true,
   sendResetEmail: jest.fn().mockResolvedValue(true),
+  sendOrderEmail: jest.fn().mockResolvedValue(true),
 }));
-import app from "../app";
-import User from "../models/user.model";
-import { connectDB } from "../database"; // adjust path if needed
+import app from "../../app";
+import User from "../../models/user.model";
+import { connectDB } from "../../database"; // adjust path if needed
 
 let userToken: string;
 let adminToken: string;
@@ -20,10 +20,9 @@ let uniqueEmail: string;
 beforeAll(async () => {
   process.env.NODE_ENV = "test";
   await connectDB();
-});
 
-afterAll(async () => {
-  await mongoose.connection.close();
+  // 🔥 Clean database ONCE before suite
+  await mongoose.connection.db.dropDatabase();
 });
 
 /* ================= AUTH TESTS ================= */
