@@ -7,7 +7,7 @@ jest.mock("../../services/email.service", () => ({
   sendResetEmail: jest.fn().mockResolvedValue(true),
 }));
 import app from "../../app";
-import { connectDB } from "../../database";
+import { connectDBTest } from "../../database";
 import User from "../../models/user.model";
 import Order from "../../models/order.model";
 
@@ -17,7 +17,7 @@ let orderId: string;
 
 beforeAll(async () => {
   process.env.NODE_ENV = "test";
-  await connectDB();
+  await connectDBTest();
 });
 
 describe("ORDER INTEGRATION TESTS", () => {

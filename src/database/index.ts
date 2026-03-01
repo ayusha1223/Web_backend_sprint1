@@ -20,3 +20,18 @@ export const connectDB = async () => {
     }
   }
 };
+
+
+export const connectDBTest = async () => {
+  try {
+    // ✅ Prevent multiple connections
+    if (mongoose.connection.readyState === 1) {
+      return;
+    }
+
+    await mongoose.connect("mongodb://127.0.0.1:27017/naayu_test_db");
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error("Database Error:", error);
+  }
+};

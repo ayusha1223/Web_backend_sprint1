@@ -8,7 +8,7 @@ jest.mock("../../services/email.service", () => ({
 }));
 import app from "../../app";
 import User from "../../models/user.model";
-import { connectDB } from "../../database"; // adjust path if needed
+import { connectDBTest } from "../../database"; // adjust path if needed
 
 let userToken: string;
 let adminToken: string;
@@ -19,7 +19,7 @@ let uniqueEmail: string;
 
 beforeAll(async () => {
   process.env.NODE_ENV = "test";
-  await connectDB();
+  await connectDBTest();
 
   // 🔥 Clean database ONCE before suite
   await mongoose.connection.db.dropDatabase();

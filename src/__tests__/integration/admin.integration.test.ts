@@ -1,7 +1,7 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import app from "../../app";
-import { connectDB } from "../../database";
+import { connectDBTest } from "../../database";
 import User from "../../models/user.model";
 
 let adminToken: string;
@@ -9,7 +9,7 @@ let userId: string;
 
 beforeAll(async () => {
   process.env.NODE_ENV = "test";
-  await connectDB();
+  await connectDBTest();
 });
 
 afterAll(async () => {

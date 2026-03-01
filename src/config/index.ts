@@ -1,7 +1,15 @@
 import dotenv from "dotenv";
-dotenv.config({
-  path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
-});
+
+if (process.env.NODE_ENV === "test") {
+  dotenv.config({
+    path: ".env.test",
+    override: true, // important
+  });
+} else {
+  dotenv.config({
+    path: ".env",
+  });
+}
 
 // Server Port
 export const PORT: number =
@@ -14,3 +22,7 @@ export const MONGODB_URI: string =
 // JWT Secret
 export const JWT_SECRET: string =
   process.env.JWT_SECRET || "default";
+
+// Refresh token secret (if used)
+export const REFRESH_TOKEN_SECRET: string =
+  process.env.REFRESH_TOKEN_SECRET || "default_refresh";

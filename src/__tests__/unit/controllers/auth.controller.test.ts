@@ -191,4 +191,99 @@ describe("AuthController Unit Tests", () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
   });
+  /* ================= GET ME ================= */
+
+it("should return current user", async () => {
+  (AuthService.getCurrentUser as jest.Mock).mockResolvedValue({ id: "123" });
+
+  await AuthController.getMe(req, res);
+
+  expect(res.json).toHaveBeenCalledWith({ id: "123" });
+});
+
+/* ================= FORGOT PASSWORD 500 ================= */
+
+it("should handle forgotPassword server error", async () => {
+  (User.findOne as jest.Mock).mockRejectedValue(new Error("DB error"));
+
+  req.body = { email: "test@test.com" };
+
+  await AuthController.forgotPassword(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
+});
+
+/* ================= RESET PASSWORD 500 ================= */
+
+it("should handle resetPassword server error", async () => {
+  (User.findOne as jest.Mock).mockRejectedValue(new Error("DB error"));
+
+  req.body = { token: "bad", newPassword: "123" };
+
+  await AuthController.resetPassword(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
+});
+
+/* ================= GET PROFILE 400 ================= */
+
+it("should return 400 if userId missing in getProfile", async () => {
+  req.user = {};
+
+  await AuthController.getProfile(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(400);
+});
+
+/* ================= UPDATE PROFILE PASSWORD ================= */
+
+it("should hash new password in updateProfile", async () => {
+  (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
+
+  (User.findByIdAndUpdate as jest.Mock).mockReturnValue({
+    select: jest.fn().mockResolvedValue({}),
+  });
+
+  req.body = { newPassword: "123" };
+
+  await AuthController.updateProfile(req, res);
+
+  expect(bcrypt.hash).toHaveBeenCalled();
+});
+
+/* ================= UPDATE PROFILE IMAGE ================= */
+
+it("should attach image in updateProfile", async () => {
+  (User.findByIdAndUpdate as jest.Mock).mockReturnValue({
+    select: jest.fn().mockResolvedValue({}),
+  });
+
+  req.file = { filename: "img.jpg" };
+
+  await AuthController.updateProfile(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(200);
+});
+
+/* ================= UPDATE PROFILE INVALID NOTIFICATIONS ================= */
+
+it("should return 400 if notifications JSON invalid", async () => {
+  req.body = { notifications: "invalid_json" };
+
+  await AuthController.updateProfile(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(400);
+});
+
+/* ================= UPDATE PROFILE CATCH ================= */
+
+it("should handle updateProfile catch error", async () => {
+  (User.findByIdAndUpdate as jest.Mock).mockImplementation(() => {
+    throw new Error("Update error");
+  });
+
+  await AuthController.updateProfile(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(400);
+});
 });

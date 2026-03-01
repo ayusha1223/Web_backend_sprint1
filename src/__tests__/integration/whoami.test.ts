@@ -1,13 +1,13 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import app from "../../app";
-import { connectDB } from "../../database";
+import { connectDBTest } from "../../database";
 
 describe("Protected Route Integration - /api/auth/whoami", () => {
   let token: string;
 
   beforeAll(async () => {
-    await connectDB();
+    await connectDBTest();
   });
 
   afterEach(async () => {

@@ -5,7 +5,7 @@ jest.mock("../../services/email.service", () => ({
   sendResetEmail: jest.fn().mockResolvedValue(true),
 }));
 import app from "../../app";
-import { connectDB } from "../../database";
+import { connectDBTest } from "../../database";
 import User from "../../models/user.model";
 import Product from "../../models/product.model";
 
@@ -16,7 +16,7 @@ let productId: string;
 
 beforeAll(async () => {
   process.env.NODE_ENV = "test";
-  await connectDB();
+  await connectDBTest();
 
   // 🧹 Clean database once before suite starts
   await User.deleteMany({});
