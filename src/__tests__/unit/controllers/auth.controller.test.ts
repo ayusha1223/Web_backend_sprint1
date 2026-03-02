@@ -191,6 +191,23 @@ describe("AuthController Unit Tests", () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
   });
+  it("should update phone in updateProfile", async () => {
+  (User.findByIdAndUpdate as jest.Mock).mockReturnValue({
+    select: jest.fn().mockResolvedValue({ phone: "999999" }),
+  });
+
+  req.body = { phone: "999999" };
+
+  await AuthController.updateProfile(req, res);
+
+  expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
+    "123",
+    expect.objectContaining({ phone: "999999" }),
+    { new: true, runValidators: true }
+  );
+
+  expect(res.status).toHaveBeenCalledWith(200);
+});
   /* ================= GET ME ================= */
 
 it("should return current user", async () => {
@@ -233,6 +250,15 @@ it("should return 400 if userId missing in getProfile", async () => {
   await AuthController.getProfile(req, res);
 
   expect(res.status).toHaveBeenCalledWith(400);
+});
+it("should handle getProfile server error", async () => {
+  (User.findById as jest.Mock).mockImplementation(() => {
+    throw new Error("DB error");
+  });
+
+  await AuthController.getProfile(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
 });
 
 /* ================= UPDATE PROFILE PASSWORD ================= */
@@ -278,12 +304,32 @@ it("should return 400 if notifications JSON invalid", async () => {
 /* ================= UPDATE PROFILE CATCH ================= */
 
 it("should handle updateProfile catch error", async () => {
+  const consoleSpy = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
+
   (User.findByIdAndUpdate as jest.Mock).mockImplementation(() => {
     throw new Error("Update error");
   });
 
   await AuthController.updateProfile(req, res);
 
+  expect(consoleSpy).toHaveBeenCalled();
   expect(res.status).toHaveBeenCalledWith(400);
+
+  consoleSpy.mockRestore();
+});
+it("should update profile with valid notifications JSON", async () => {
+  (User.findByIdAndUpdate as jest.Mock).mockReturnValue({
+    select: jest.fn().mockResolvedValue({}),
+  });
+
+  req.body = {
+    notifications: JSON.stringify({ email: true }),
+  };
+
+  await AuthController.updateProfile(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(200);
 });
 });

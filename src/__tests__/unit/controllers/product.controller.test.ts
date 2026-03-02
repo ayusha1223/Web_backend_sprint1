@@ -85,6 +85,28 @@ it("should return all products", async () => {
     data: [{ name: "P1" }],
   });
 });
+it("should handle getAll error", async () => {
+  req.query = { search: "phone" };
+
+  mockService.getAllProducts.mockRejectedValue(new Error("Fail"));
+
+  await controller.getAll(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
+  expect(res.json).toHaveBeenCalledWith({
+    success: false,
+    message: "Fetch failed",
+  });
+});
+it("should pass search query to service", async () => {
+  req.query = { search: "laptop" };
+
+  mockService.getAllProducts.mockResolvedValue([]);
+
+  await controller.getAll(req, res);
+
+  expect(mockService.getAllProducts).toHaveBeenCalledWith("laptop");
+});
 
   // ================= UPDATE =================
 

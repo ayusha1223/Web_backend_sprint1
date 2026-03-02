@@ -50,6 +50,23 @@ describe("ProductService Unit Tests", () => {
     expect(mockRepo.findAll).toHaveBeenCalled();
     expect(result).toHaveLength(1);
   });
+  it("should search products when search query provided", async () => {
+  (Product.find as jest.Mock).mockResolvedValue([
+    { name: "Laptop" },
+  ]);
+
+  const result = await service.getAllProducts("lap");
+
+  expect(Product.find).toHaveBeenCalledWith({
+    $or: [
+      { name: { $regex: "lap", $options: "i" } },
+      { description: { $regex: "lap", $options: "i" } },
+      { category: { $regex: "lap", $options: "i" } },
+    ],
+  });
+
+  expect(result).toHaveLength(1);
+});
 
   // =========================
   // GET PRODUCT BY ID

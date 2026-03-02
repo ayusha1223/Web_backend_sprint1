@@ -79,6 +79,23 @@ describe("AdminUserController - FULL COVERAGE", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
   });
+  it("should create user without image", async () => {
+  req.body = {
+    name: "Test",
+    email: "test@test.com",
+    password: "123456",
+    role: "user",
+  };
+
+  req.file = undefined;
+
+  serviceMock.createUser.mockResolvedValue({ id: "1" } as any);
+
+  await controller.createUser(req, res);
+
+  expect(serviceMock.createUser).toHaveBeenCalled();
+  expect(res.status).toHaveBeenCalledWith(201);
+});
 
   /* ================= GET ALL USERS ================= */
 
@@ -103,6 +120,20 @@ describe("AdminUserController - FULL COVERAGE", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
   });
+  
+it("should use default pagination when no query provided", async () => {
+  req.query = {};
+
+  serviceMock.getAllUsers.mockResolvedValue({
+    users: [],
+    pagination: {},
+  } as any);
+
+  await controller.getAllUsers(req, res);
+
+  expect(serviceMock.getAllUsers).toHaveBeenCalledWith(1, 5);
+  expect(res.status).toHaveBeenCalledWith(200);
+});
 
   /* ================= GET USER BY ID ================= */
 
@@ -145,6 +176,42 @@ describe("AdminUserController - FULL COVERAGE", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
   });
+  it("should handle error if Order.find fails", async () => {
+  req.params.id = "1";
+
+  serviceMock.getUserById.mockResolvedValue({ id: "1" } as any);
+
+  (Order.find as jest.Mock).mockImplementation(() => ({
+    sort: jest.fn().mockRejectedValue({
+      statusCode: 500,
+      message: "Order error",
+    }),
+  }));
+
+  await controller.getUserById(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
+});
+it("should handle error if Payment.find fails", async () => {
+  req.params.id = "1";
+
+  serviceMock.getUserById.mockResolvedValue({ id: "1" } as any);
+
+  (Order.find as jest.Mock).mockReturnValue({
+    sort: jest.fn().mockResolvedValue([]),
+  });
+
+  (Payment.find as jest.Mock).mockImplementation(() => ({
+    sort: jest.fn().mockRejectedValue({
+      statusCode: 500,
+      message: "Payment error",
+    }),
+  }));
+
+  await controller.getUserById(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
+});
 
   /* ================= UPDATE USER ================= */
 
@@ -195,6 +262,27 @@ describe("AdminUserController - FULL COVERAGE", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
   });
+  it("should update without hashing if no password provided", async () => {
+  req.params.id = "1";
+  req.body = { name: "Updated Name" };
+
+  serviceMock.updateUser.mockResolvedValue({ id: "1" } as any);
+
+  await controller.updateUser(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(200);
+});
+it("should NOT hash when password is empty string", async () => {
+  req.params.id = "1";
+  req.body.password = "";
+
+  serviceMock.updateUser.mockResolvedValue({ id: "1" } as any);
+
+  await controller.updateUser(req, res);
+
+  expect(bcrypt.hash).not.toHaveBeenCalled();
+  expect(res.status).toHaveBeenCalledWith(200);
+});
 
   /* ================= DELETE USER ================= */
 
